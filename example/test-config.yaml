@@ -74,15 +74,22 @@ languages:
     # the property.
     # -------------------------------------------------------------------------
     distributions:
-      - type: git                                                # Distribute file to a Git server. Minimum
-                                                                 # Git requirement is v2.29.0.
-        as: git-monstermichl                                     # An alias is required if the password shall
-                                                                 # be provided via commandline in the form of
-                                                                 # -s/--secret <alias>=[<username>:]<password>.
-        url: https://github.com/monstermichl/confluent-test.git  # URL of the Git repository.
-        path: generated                                          # Target path within the Git repository.
-        user: monstermichl                                       # Git user (optional).
-        password: password123                                    # Git password (optional).
+      # --- Distribution via Git ------------------------------------------------
+      # Distribute file to a Git server. Minimum Git requirement is v2.29.0.
+      #
+      # type     (required): Specifies Git as the distribution type.
+      # url      (required): Specifies the URL of the Git repository.
+      # path     (optional): Relative target path within the Git repository.
+      # user     (optional): Git user.
+      # password (optional): Git password.
+      # as       (optional): An alias is required if the password shall e provided
+      #                      via commandline in the form of
+      #                      -s/--secret <alias>=[<username>:]<password>.
+      # -------------------------------------------------------------------------
+      - type: git                                                
+        as: git-monstermichl                                     
+        url: https://github.com/monstermichl/confluent-test.git
+        path: generated
 
   # -------------------------------------------------------------------------
   - type: python
