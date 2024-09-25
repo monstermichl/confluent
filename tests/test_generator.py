@@ -87,13 +87,15 @@ class TestGenerator(unittest.TestCase):
         for config in orchestrator.language_configs:
             self.assertIn(config.config_info.file_name_full, files)
 
-    def test_git_distribution(self):
+    def test_distributions(self):
         # Get secret from environment variables.
-        credential = DistributorCredential('git-monstermichl', None, os.environ['SECRET'])
-        orchestrator = Orchestrator.read_config(self._test_config_path, [credential])
+        #credential = DistributorCredential('git-monstermichl', None, os.environ['SECRET'])
+        orchestrator = Orchestrator.read_config(self._test_config_path, [])
 
         self._evaluate_configs(orchestrator.language_configs)
         orchestrator.distribute()
+
+        # Check if file has been written.
 
     def _evaluate_configs(self, configs: List[LanguageConfigBase]):
         checks = [

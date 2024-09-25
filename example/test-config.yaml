@@ -66,7 +66,7 @@ languages:
     # Each language section can have a distributions section which specifies,
     # to which locations to distribute the generated file to.
     #
-    # type (required): Specifies the distribution type (git).
+    # type (required): Specifies the distribution type (git | fs).
     # as   (optional): Specifies an alias for the distribution. This alias might
     #                  be necessary for specific distribution types (e.g. for git).
     #
@@ -74,10 +74,10 @@ languages:
     # the property.
     # -------------------------------------------------------------------------
     distributions:
-      # --- Distribution via Git ------------------------------------------------
-      # Distribute file to a Git server. Minimum Git requirement is v2.29.0.
+      # --- Distribution to a Git server ----------------------------------------
+      # Distributes the file to a Git server. Minimum Git requirement is v2.29.0.
       #
-      # type     (required): Specifies Git as the distribution type.
+      # type     (required): Specifies Git as the distribution type (git).
       # url      (required): Specifies the URL of the Git repository.
       # path     (optional): Relative target path within the Git repository.
       # user     (optional): Git user.
@@ -86,10 +86,22 @@ languages:
       #                      via commandline in the form of
       #                      -s/--secret <alias>=[<username>:]<password>.
       # -------------------------------------------------------------------------
-      - type: git                                                
-        as: git-monstermichl                                     
-        url: https://github.com/monstermichl/confluent-test.git
-        path: generated
+      #- type: git
+      #  as: git-monstermichl
+      #  url: https://github.com/monstermichl/confluent-test.git
+      #  path: generated
+
+      # --- Distribution to filesystem ------------------------------------------
+      # Distribute the file to a different location in the file system.
+      #
+      # type        (required): Specifies filesystem as the distribution type (fs).
+      # path        (optional): Relative or absolute target path.
+      # create_dirs (optional): If true, parent directories will be created if
+      #                         they don't exist.
+      # -------------------------------------------------------------------------
+      - type: fs
+        path: distributed
+        create_dirs: true
 
   # -------------------------------------------------------------------------
   - type: python

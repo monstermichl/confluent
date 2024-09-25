@@ -15,6 +15,7 @@ from .language_config_naming_conventions import LanguageConfigNamingConventions
 from .distributor_base import DistributorBase, DistributorCredential
 
 from ..distributors.git_distributor import GitDistributor
+from ..distributors.fs_distributor import FsDistributor
 
 # Main categories.
 _KEY_INCLUDES = 'includes'
@@ -39,6 +40,7 @@ _LANGUAGE_KEY_NAME = 'name'
 _LANGUAGE_KEY_USER = 'user'
 _LANGUAGE_KEY_PASSWORD = 'password'
 _LANGUAGE_KEY_AS = 'as'
+_LANGUAGE_KEY_CREATE_DIRS = 'create_dirs'
 
 # Property keys.
 _PROPERTY_KEY_VALUE = 'value'
@@ -47,6 +49,7 @@ _PROPERTY_KEY_COMMENT = 'comment'
 
 # Distribution types.
 _DISTRIBUTION_TYPE_GIT = 'git'
+_DISTRIBUTION_TYPE_FS = 'fs'
 
 # Load the glue.
 _LANGUAGE_MAPPINGS = ConfigLanguageMapping.get_mappings()
@@ -124,6 +127,7 @@ class Config:
         namespace: str='',
         namespaces: List[str]=None,
         distributor_credentials: List[DistributorCredential]=[],
+        base_directory: str='',
     ) -> List[LanguageConfigBase]:
         """
         Reads the provided YAML configuration file and generates a list of language configurations.
@@ -138,6 +142,10 @@ class Config:
         """
         with open(path, 'r') as f:
             content = f.read()
+        file_directory = os.path.dirname(path)
+
+        if not base_directory:
+            base_directory = os.path.join(os.getcwd(), file_directory)
 
         # Prepare config name.
         last_part = path.replace(r'\\', '/').split('/')[-1]
@@ -150,9 +158,10 @@ class Config:
             content,
             config_name,
             namespace,
-            os.path.dirname(path),
+            file_directory,
             namespaces,
-            distributor_credentials
+            distributor_credentials,
+            base_directory,
         )
 
     @staticmethod
@@ -163,6 +172,7 @@ class Config:
         directory: str='',
         namespaces: List[str]=None,
         distributor_credentials: List[DistributorCredential]=[],
+        base_directory: str='',
     ) -> Tuple[List[LanguageConfigBase], List[Property]]:
         """
         Parses the provided YAML configuration string and returns the corresponding language configurations.
@@ -209,7 +219,12 @@ class Config:
                     inclusion_path = os.path.join(directory, inclusion_path)
 
                 # Read included config and put properties into property list.
-                for inclusion_property in Config._read(inclusion_path, inclusion_namespace, namespaces)[1]:
+                for inclusion_property in Config._read(
+                    path=inclusion_path,
+                    namespace=inclusion_namespace,
+                    namespaces=namespaces,
+                    base_directory=base_directory,
+                )[1]:
                     inclusion_property.hidden = True  # Included properties are not being exported by default.
                     properties.append(inclusion_property)
 
@@ -254,7 +269,7 @@ class Config:
                     indent=indent,
                     transform=transform,
                     naming_conventions=naming_conventions,
-                    distributors=Config._evaluate_distributors(language, distributor_credentials),
+                    distributors=Config._evaluate_distributors(language, base_directory, distributor_credentials),
 
                     # Pass all language props as additional_props to let the specific
                     # generator decide which props it requires additionally.
@@ -370,6 +385,7 @@ class Config:
     @staticmethod
     def _evaluate_distributors(
         language_config: Dict[str, any],
+        base_directory: str,
         distributor_credentials: List[DistributorCredential]=[]
     ) -> List[DistributorBase]:
         """
@@ -432,6 +448,18 @@ class Config:
                         path,
                         user,
                         password,
+                    )
+                elif type == _DISTRIBUTION_TYPE_FS:
+                    path = from_config(_LANGUAGE_KEY_PATH)
+
+                    # Build distributor.
+                    distributor = FsDistributor(
+                        # Provide absolute path to constructor if possible.
+                        os.path.join(
+                            base_directory if base_directory else '',
+                            path if path else ''
+                        ),
+                        from_config(_LANGUAGE_KEY_CREATE_DIRS),
                     )
                 else:
                     pass  # No other types are supported yet.
