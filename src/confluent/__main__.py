@@ -4,6 +4,9 @@ from typing import List
 
 from .base.orchestrator import Orchestrator
 from .base.distributor_base import DistributorCredential
+from .base.info import deprecation_warning
+
+deprecation_warning()
 
 _CONFIG_PARAMETER = 'config'
 _OUTPUT_PARAMETER = 'output'
